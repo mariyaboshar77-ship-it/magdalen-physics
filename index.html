@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magdalen Physics — A-Level Physics, Interactively</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #170f28; }
+</style>
+</head>
+<body>
+<div id="phys-app">
+<style>
+  #phys-app {
+    --bg: #1c1230;
+    --bg-deep: #130b22;
+    --panel: #2a1d42;
+    --panel-2: #33244f;
+    --paper: #f3e6d8;
+    --text: #ece2f5;
+    --text-dim: #b6a5cf;
+    --text-faint: #7c6a99;
+    --amber: #b28cf0;
+    --cyan: #d9b8e8;
+    --violet: #8a5cd6;
+    --lavender: #a98add;
+    --red: #ef8b73;
+    --success: #8fc98a;
+    --grid-line: rgba(255,255,255,0.07);
+    --font-display: 'Baloo 2', 'Inter', sans-serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    border-radius: 12px;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+  #phys-app * { box-sizing: border-box; }
+  #phys-app .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- background: night sky ---------- */
+  #phys-app .grid-bg {
+    position: relative;
+    background-image:
+      radial-gradient(1.5px 1.5px at 8% 12%, rgba(255,255,255,0.55) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 22% 68%, rgba(255,255,255,0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 22%, rgba(255,255,255,0.5) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 58% 80%, rgba(255,255,255,0.35) 50%, transparent 51%),
+      radial-gradient(1px 1px at 74% 15%, rgba(255,255,255,0.5) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 88% 55%, rgba(255,255,255,0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 95% 88%, rgba(255,255,255,0.45) 50%, transparent 51%),
+      radial-gradient(1200px 500px at 50% -10%, rgba(138,92,214,0.25), transparent 60%);
+    background-color: var(--bg-deep);
+  }
+
+  /* ---------- nav ---------- */
+  #phys-app nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 28px; border-bottom: 1px solid var(--grid-line);
+  }
+  #phys-app .logo {
+    font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.5px;
+    font-size: 15px; color: var(--amber); display: flex; align-items: center; gap: 8px;
+  }
+  #phys-app .badge { display: block; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(178,140,240,0.5)); }
+  #phys-app .nav-links { display: flex; gap: 24px; font-size: 14px; color: var(--text-dim); }
+  #phys-app .nav-links a { color: var(--text-dim); text-decoration: none; cursor: pointer; }
+  #phys-app .nav-links a:hover { color: var(--amber); }
+  #phys-app .profile-chip {
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim);
+    background: var(--panel); border: 1px solid var(--grid-line); border-radius: 20px;
+    padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+  #phys-app .profile-chip:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* ---------- hero ---------- */
+  #phys-app .hero {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+    padding: 56px 28px 64px; align-items: center;
+    border-top: 1px solid var(--grid-line);
+  }
+  #phys-app .eyebrow {
+    font-family: var(--font-mono); font-size: 12px; color: var(--amber);
+    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px;
+  }
+  #phys-app h1 {
+    font-family: var(--font-display); font-size: 44px; font-weight: 600;
+    line-height: 1.12; margin: 0 0 18px; color: var(--paper);
+  }
+  #phys-app h1 em { color: var(--amber); font-style: normal; }
+  #phys-app .hero p.lead { color: var(--text-dim); font-size: 16px; max-width: 42ch; margin-bottom: 26px; }
+  #phys-app .cta-row { display: flex; gap: 12px; align-items: center; }
+  #phys-app .btn {
+    font-family: var(--font-body); font-weight: 600; font-size: 14.5px;
+    padding: 12px 22px; border-radius: 7px; border: none; cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  #phys-app .btn:hover { transform: translateY(-1px); }
+  #phys-app .btn-primary { background: var(--amber); color: #14181f; }
+  #phys-app .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--grid-line); }
+  #phys-app .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* ---------- simulator panel ---------- */
+  #phys-app .sim-panel {
+    background: var(--panel); border: 1px solid var(--grid-line); border-radius: 10px;
+    padding: 18px 18px 14px;
+  }
+  #phys-app .sim-title {
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-faint);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+    display: flex; justify-content: space-between;
+  }
+  #phys-app canvas { width: 100%; display: block; border-radius: 6px; background: #0e1218; }
+  #phys-app .sim-controls { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  #phys-app .control label {
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim);
+    display: flex; justify-content: space-between; margin-bottom: 4px;
+  }
+  #phys-app .control label span.val { color: var(--amber); }
+  #phys-app input[type="range"] {
+    width: 100%; accent-color: var(--amber); height: 4px;
+  }
+  #phys-app .readouts {
+    margin-top: 14px; display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  }
+  #phys-app .readouts .rv { color: var(--cyan); font-size: 14px; display: block; margin-top: 2px; }
+
+  /* ---------- section headers ---------- */
+  #phys-app section { padding: 60px 28px 0; border-top: none; position: relative; }
+  #phys-app section#topics { padding-top: 8px; }
+  #phys-app .section-head { margin-bottom: 34px; }
+  #phys-app .section-head .eyebrow { margin-bottom: 8px; }
+  #phys-app h2 { font-family: var(--font-display); font-size: 28px; color: var(--paper); margin: 0 0 8px; }
+  #phys-app .section-head p { color: var(--text-dim); font-size: 14.5px; max-width: 56ch; }
+
+  /* ---------- topic map ---------- */
+  #phys-app .topic-map { overflow-x: auto; padding-bottom: 8px; }
+  #phys-app .topic-map svg { display: block; min-width: 900px; }
+  #phys-app .topic-node { cursor: default; }
+  #phys-app .topic-node.active { cursor: pointer; }
+  #phys-app .topic-node text.label { font-family: var(--font-body); font-weight: 600; font-size: 11.5px; }
+  #phys-app .topic-node text.status { font-family: var(--font-body); font-size: 9px; }
+
+  /* ---------- lesson ---------- */
+  #phys-app .lesson-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 36px; }
+  #phys-app .lesson-text p { color: var(--text); font-size: 15px; margin: 0 0 16px; }
+  #phys-app .lesson-text .formula {
+    font-family: var(--font-mono); background: var(--panel); border-left: 3px solid var(--amber);
+    padding: 12px 16px; margin: 16px 0; font-size: 14px; color: var(--cyan); border-radius: 0 6px 6px 0;
+  }
+  #phys-app .lesson-text .formula .fname { color: var(--text-faint); display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  #phys-app .callout {
+    background: var(--panel-2); border: 1px solid var(--grid-line); border-radius: 8px;
+    padding: 14px 16px; font-size: 13.5px; color: var(--text-dim); margin-top: 20px;
+  }
+  #phys-app .callout strong { color: var(--amber); }
+
+  /* ---------- quiz ---------- */
+  #phys-app .quiz-box {
+    background: var(--panel); border: 1px solid var(--grid-line); border-radius: 10px; padding: 24px;
+  }
+  #phys-app .q-item { margin-bottom: 22px; }
+  #phys-app .q-item .q-text { font-size: 14.5px; margin-bottom: 10px; color: var(--paper); }
+  #phys-app .q-item .q-num { font-family: var(--font-mono); color: var(--amber); font-size: 12px; margin-right: 6px; }
+  #phys-app .opt {
+    display: block; width: 100%; text-align: left; padding: 10px 14px; margin-bottom: 8px;
+    background: var(--panel-2); border: 1px solid var(--grid-line); border-radius: 6px;
+    color: var(--text-dim); font-size: 13.5px; cursor: pointer; font-family: var(--font-body);
+  }
+  #phys-app .opt:hover { border-color: var(--amber); }
+  #phys-app .opt.correct { border-color: var(--success); color: var(--success); background: rgba(143,201,138,0.08); }
+  #phys-app .opt.wrong { border-color: var(--red); color: var(--red); background: rgba(232,92,74,0.08); }
+  #phys-app .opt:disabled { cursor: default; }
+  #phys-app .quiz-footer {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
+    padding-top: 16px; border-top: 1px solid var(--grid-line);
+  }
+  #phys-app .score-display { font-family: var(--font-mono); font-size: 13px; color: var(--text-dim); }
+  #phys-app .score-display .sv { color: var(--amber); font-size: 16px; }
+
+  /* ---------- dashboard (compact top bar) ---------- */
+  #phys-app .dash-bar { border-bottom: 1px solid var(--grid-line); background: rgba(42,29,66,0.45); }
+  #phys-app .dash-bar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; padding: 12px 28px;
+  }
+  #phys-app .dash-name-row { display: flex; gap: 8px; align-items: center; flex: 1 1 240px; max-width: 340px; }
+  #phys-app .dash-name-row input {
+    background: var(--panel); border: 1px solid var(--grid-line); border-radius: 6px;
+    color: var(--text); padding: 7px 10px; font-family: var(--font-body); font-size: 12.5px; flex: 1; min-width: 0;
+  }
+  #phys-app .dash-name-row .btn { padding: 7px 14px; font-size: 12.5px; }
+  #phys-app .dash-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  #phys-app .dash-card {
+    background: var(--panel); border: 1px solid var(--grid-line); border-radius: 8px;
+    padding: 6px 14px; text-align: center; min-width: 76px;
+  }
+  #phys-app .dash-card .dk { font-family: var(--font-mono); font-size: 9px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; }
+  #phys-app .dash-card .dv { font-family: var(--font-display); font-size: 18px; color: var(--paper); margin-top: 2px; }
+  #phys-app footer { padding: 30px 28px 40px; text-align: center; color: var(--text-faint); font-family: var(--font-mono); font-size: 11.5px; }
+
+  @media (max-width: 760px) {
+    #phys-app .hero, #phys-app .lesson-grid { grid-template-columns: 1fr; }
+    #phys-app .dash-bar-inner { justify-content: flex-start; }
+    #phys-app h1 { font-size: 32px; }
+    #phys-app .sim-controls { grid-template-columns: 1fr; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+<div class="grid-bg">
+  <nav>
+    <div class="logo">
+      <svg class="badge" width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="48" fill="#a98ad0"/>
+        <circle cx="50" cy="48" r="34" fill="#f2e0d2"/>
+        <g fill="none" stroke="#f7f0fa" stroke-width="1.6" stroke-linecap="round" opacity="0.8">
+          <path d="M20 24 l2.2 2.2 M20 26.2 l2.2 -2.2"/>
+          <path d="M78 20 l1.8 1.8 M78 21.8 l1.8 -1.8"/>
+          <path d="M30 74 l1.6 1.6 M30 75.6 l1.6 -1.6"/>
+        </g>
+        <g fill="#7c4dbd">
+          <path d="M22 62 Q17 50 22 34 Q27 50 22 62 Z"/>
+          <path d="M78 62 Q73 50 78 34 Q83 50 78 62 Z"/>
+        </g>
+        <g fill="#3f6b3f">
+          <path d="M22 60 Q14 63 12 70 Q19 68 22 60 Z"/>
+          <path d="M78 60 Q86 63 88 70 Q81 68 78 60 Z"/>
+        </g>
+        <g>
+          <path d="M50 18 C58 26 61 38 61 47 L39 47 C39 38 42 26 50 18 Z" fill="#7c4dbd"/>
+          <rect x="40" y="45" width="20" height="27" rx="7" fill="#f2f2f6"/>
+          <circle cx="50" cy="53" r="4.2" fill="#7c4dbd" stroke="#5a3591" stroke-width="1"/>
+          <circle cx="50" cy="63" r="3" fill="#7c4dbd" stroke="#5a3591" stroke-width="1"/>
+          <path d="M40 59 L28 78 L40 71 Z" fill="#5a3591"/>
+          <path d="M60 59 L72 78 L60 71 Z" fill="#5a3591"/>
+          <path d="M45 71 L55 71 L50 82 Z" fill="#c9c9d6"/>
+        </g>
+      </svg>
+      MAGDALEN PHYSICS · MECHANICS
+    </div>
+    <div class="nav-links">
+      <a data-nav="topics">Topics</a>
+      <a data-nav="lesson">Lesson</a>
+      <a data-nav="dashboard">Dashboard</a>
+    </div>
+    <div class="profile-chip" id="navProfile">◍ set your name</div>
+  </nav>
+
+  <div class="dash-bar" id="dashboard">
+    <div class="wrap dash-bar-inner">
+      <div class="dash-name-row">
+        <input type="text" id="nameInput" placeholder="Enter your name to save progress…">
+        <button class="btn btn-primary" id="saveNameBtn">Save</button>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card"><div class="dk">Topics</div><div class="dv" id="dashTopics">1 / 8</div></div>
+        <div class="dash-card"><div class="dk">Best score</div><div class="dv" id="dashScore">–</div></div>
+        <div class="dash-card"><div class="dk">Lessons</div><div class="dv" id="dashLessons">0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOPIC MAP -->
+  <section id="topics">
+    <div class="wrap">
+      <div class="topic-map" id="topicMapWrap"></div>
+    </div>
+  </section>
+
+  <div class="hero wrap">
+    <div>
+      <div class="eyebrow">A-Level Physics · Mechanics</div>
+      <h1>Learn projectile motion by <em>throwing things</em>, not memorising them.</h1>
+      <p class="lead">Drag the sliders. Watch the trajectory. Every curve on this page is live physics, not an illustration — the same equations you'll use in the exam.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" id="startLessonBtn">Start the lesson</button>
+        <button class="btn btn-ghost" data-nav="topics">See full spec map</button>
+      </div>
+    </div>
+
+    <div class="sim-panel">
+      <div class="sim-title"><span>LIVE TRAJECTORY</span><span id="heroFlightState">t = 0.00 s</span></div>
+      <canvas id="heroCanvas" height="260"></canvas>
+      <div class="sim-controls">
+        <div class="control">
+          <label>Launch angle <span class="val" id="heroAngleVal">45°</span></label>
+          <input type="range" id="heroAngle" min="10" max="80" value="45">
+        </div>
+        <div class="control">
+          <label>Launch speed <span class="val" id="heroSpeedVal">20 m/s</span></label>
+          <input type="range" id="heroSpeed" min="5" max="40" value="20">
+        </div>
+      </div>
+      <div class="readouts">
+        <div>RANGE<span class="rv" id="heroRange">–</span></div>
+        <div>MAX HEIGHT<span class="rv" id="heroHeight">–</span></div>
+        <div>FLIGHT TIME<span class="rv" id="heroTime">–</span></div>
+        <div>v (at t)<span class="rv" id="heroVel">–</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LESSON -->
+  <section id="lesson">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Mechanics · Lesson 1</div>
+        <h2>Projectile motion</h2>
+        <p>The core trick: split the motion into two independent directions and solve each with ordinary SUVAT equations.</p>
+      </div>
+
+      <div class="lesson-grid">
+        <div class="lesson-text">
+          <p>Once a projectile leaves the launcher, only <strong>gravity</strong> acts on it (we ignore air resistance at A-Level unless told otherwise). That single fact is the whole topic. Gravity only pulls <em>downward</em>, so it only ever changes the <em>vertical</em> velocity — the horizontal velocity never changes.</p>
+
+          <div class="formula">
+            <span class="fname">Horizontal — constant velocity</span>
+            x = u·cosθ · t
+          </div>
+          <div class="formula">
+            <span class="fname">Vertical — constant acceleration g</span>
+            y = u·sinθ · t − ½ g t²
+          </div>
+
+          <p>Because the two directions don't interact, you can treat this as two separate 1-D problems happening at the same time, linked only by the shared variable <em>t</em>.</p>
+
+          <div class="formula">
+            <span class="fname">Time of flight (lands at same height)</span>
+            T = 2u·sinθ / g
+          </div>
+          <div class="formula">
+            <span class="fname">Range</span>
+            R = u² sin(2θ) / g
+          </div>
+
+          <div class="callout">
+            <strong>Try it in the simulator</strong> — push the angle to 45° and back down to 20°. Notice the range peaks at 45°, not at the steepest or flattest angle. That's a genuinely common exam question.
+          </div>
+        </div>
+
+        <div class="sim-panel">
+          <div class="sim-title"><span>PLAYGROUND</span><span id="lessonFlightState">t = 0.00 s</span></div>
+          <canvas id="lessonCanvas" height="280"></canvas>
+          <div class="sim-controls">
+            <div class="control">
+              <label>Launch angle <span class="val" id="lessonAngleVal">45°</span></label>
+              <input type="range" id="lessonAngle" min="10" max="80" value="45">
+            </div>
+            <div class="control">
+              <label>Launch speed <span class="val" id="lessonSpeedVal">20 m/s</span></label>
+              <input type="range" id="lessonSpeed" min="5" max="40" value="20">
+            </div>
+          </div>
+          <div class="readouts">
+            <div>RANGE<span class="rv" id="lessonRange">–</span></div>
+            <div>MAX HEIGHT<span class="rv" id="lessonHeight">–</span></div>
+            <div>v<sub>x</sub><span class="rv" id="lessonVx">–</span></div>
+            <div>v<sub>y</sub><span class="rv" id="lessonVy">–</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Check your understanding</div>
+        <h2>Four questions, instant feedback</h2>
+        <p>Your best score on this quiz is saved to your dashboard at the top.</p>
+      </div>
+      <div class="quiz-box" id="quizBox"></div>
+    </div>
+  </section>
+
+  <footer>MAGDALEN PHYSICS — prototype build · A-Level Mechanics, Lesson 1 of many</footer>
+</div>
+</div>
+
+<script>
+(function(){
+  const root = document.getElementById('phys-app');
+
+  // ---------- physics ----------
+  const G = 9.81;
+  function trajectory(u, angleDeg){
+    const angle = angleDeg * Math.PI/180;
+    const ux = u*Math.cos(angle), uy = u*Math.sin(angle);
+    const T = (2*uy)/G;
+    const steps = 140;
+    const pts = [];
+    for(let i=0;i<=steps;i++){
+      const t = T*i/steps;
+      pts.push({t, x: ux*t, y: Math.max(uy*t - 0.5*G*t*t, 0)});
+    }
+    return { pts, T, ux, uy, range: ux*T, maxH: (uy*uy)/(2*G) };
+  }
+
+  function setupSim(canvasId, angleId, speedId, angleValId, speedValId, readoutIds, stateId){
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const angleInput = document.getElementById(angleId);
+    const speedInput = document.getElementById(speedId);
+    let raf, startTime;
+
+    function resize(){
+      const w = canvas.clientWidth;
+      canvas.width = w * 2; canvas.height = canvas.clientHeight * 2;
+      ctx.setTransform(2,0,0,2,0,0);
+    }
+
+    function draw(){
+      const u = parseFloat(speedInput.value);
+      const a = parseFloat(angleInput.value);
+      const data = trajectory(u, a);
+      const W = canvas.clientWidth, H = canvas.clientHeight;
+      const padL = 30, padB = 26, padT = 16, padR = 16;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const maxX = data.range * 1.12 || 1, maxY = data.maxH * 1.5 || 1;
+      const sx = x => padL + (x/maxX)*plotW;
+      const sy = y => padT + plotH - (y/maxY)*plotH;
+
+      ctx.clearRect(0,0,W,H);
+
+      // ground
+      ctx.strokeStyle = 'rgba(178,140,240,0.35)';
+      ctx.beginPath(); ctx.moveTo(padL, padT+plotH); ctx.lineTo(padL+plotW, padT+plotH); ctx.stroke();
+
+      // trajectory path
+      ctx.strokeStyle = '#c9a6e8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      data.pts.forEach((p,i)=>{
+        const X = sx(p.x), Y = sy(p.y);
+        if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+      });
+      ctx.stroke();
+
+      // moving marker based on elapsed time (loops) — a little rocket riding the arc
+      const elapsed = ((performance.now() - startTime)/1000) % (data.T || 1);
+      const idx = Math.min(data.pts.length-1, Math.floor((elapsed/(data.T||1))*data.pts.length));
+      const marker = data.pts[idx] || data.pts[0];
+      const mx = sx(marker.x), my = sy(marker.y);
+      const vyNow = data.uy - G*elapsed;
+      const heading = Math.atan2(-vyNow, data.ux) - Math.PI/4; // emoji glyph points up-right by default
+
+      ctx.save();
+      ctx.shadowColor = 'rgba(178,140,240,0.8)'; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.fillStyle = 'rgba(178,140,240,0.25)';
+      ctx.arc(mx, my, 8, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.translate(mx, my);
+      ctx.rotate(heading);
+      ctx.font = '15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🚀', 0, 1);
+      ctx.restore();
+
+      // labels
+      angleValId && (document.getElementById(angleValId).textContent = a + '°');
+      speedValId && (document.getElementById(speedValId).textContent = u + ' m/s');
+      if(readoutIds){
+        if(readoutIds.range) document.getElementById(readoutIds.range).textContent = data.range.toFixed(1)+' m';
+        if(readoutIds.height) document.getElementById(readoutIds.height).textContent = data.maxH.toFixed(1)+' m';
+        if(readoutIds.time) document.getElementById(readoutIds.time).textContent = data.T.toFixed(2)+' s';
+        if(readoutIds.vel){
+          const vy = data.uy - G*elapsed;
+          const v = Math.sqrt(data.ux*data.ux + vy*vy);
+          document.getElementById(readoutIds.vel).textContent = v.toFixed(1)+' m/s';
+        }
+        if(readoutIds.vx) document.getElementById(readoutIds.vx).textContent = data.ux.toFixed(1)+' m/s';
+        if(readoutIds.vy){
+          const vy = data.uy - G*elapsed;
+          document.getElementById(readoutIds.vy).textContent = vy.toFixed(1)+' m/s';
+        }
+      }
+      if(stateId) document.getElementById(stateId).textContent = 't = '+elapsed.toFixed(2)+' s';
+
+      raf = requestAnimationFrame(draw);
+    }
+
+    startTime = performance.now();
+    window.addEventListener('resize', resize);
+    resize();
+    angleInput.addEventListener('input', ()=>{ startTime = performance.now(); });
+    speedInput.addEventListener('input', ()=>{ startTime = performance.now(); });
+    raf = requestAnimationFrame(draw);
+  }
+
+  setupSim('heroCanvas','heroAngle','heroSpeed','heroAngleVal','heroSpeedVal',
+    { range:'heroRange', height:'heroHeight', time:'heroTime', vel:'heroVel' }, 'heroFlightState');
+
+  setupSim('lessonCanvas','lessonAngle','lessonSpeed','lessonAngleVal','lessonSpeedVal',
+    { range:'lessonRange', height:'lessonHeight', vx:'lessonVx', vy:'lessonVy' }, 'lessonFlightState');
+
+  // ---------- topic map ----------
+  const topics = [
+    { name:'Measurements & Errors', status:'locked' },
+    { name:'Mechanics', status:'active' },
+    { name:'Materials', status:'locked' },
+    { name:'Waves', status:'locked' },
+    { name:'Electricity', status:'locked' },
+    { name:'Further Mechanics', status:'locked' },
+    { name:'Fields', status:'locked' },
+    { name:'Nuclear & Particle', status:'locked' },
+  ];
+  (function renderMap(){
+    const wrap = document.getElementById('topicMapWrap');
+    const w = 900, h = 140, n = topics.length;
+    const spacing = (w-80)/(n-1);
+    let nodes = '', lines = '';
+    topics.forEach((t,i)=>{
+      const cx = 40 + i*spacing, cy = 70;
+      if(i>0){
+        const px = 40+(i-1)*spacing;
+        lines += `<line x1="${px}" y1="${cy}" x2="${cx}" y2="${cy}" stroke="${t.status==='active'||topics[i-1].status==='active' ? '#c9a6f5' : 'rgba(255,255,255,0.12)'}" stroke-width="1.5" />`;
+      }
+      const isActive = t.status === 'active';
+      nodes += `
+        <g class="topic-node ${isActive?'active':''}" data-idx="${i}">
+          <circle cx="${cx}" cy="${cy}" r="16" fill="${isActive ? '#c9a6f5' : '#2a1d42'}" stroke="${isActive ? '#c9a6f5' : 'rgba(255,255,255,0.18)'}" stroke-width="1.5"/>
+          ${isActive ? `<circle cx="${cx}" cy="${cy}" r="16" fill="none" stroke="#c9a6f5" stroke-width="1" opacity="0.4"><animate attributeName="r" values="16;24;16" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite"/></circle>` : ''}
+          <text class="label" x="${cx}" y="${cy+34}" text-anchor="middle" fill="${isActive ? '#f3e6d8' : '#b6a5cf'}">${t.name}</text>
+          <text class="status" x="${cx}" y="${cy+46}" text-anchor="middle" fill="${isActive ? '#c9a6f5' : '#7c6a99'}">${isActive ? 'IN PROGRESS' : 'LOCKED'}</text>
+        </g>`;
+    });
+    wrap.innerHTML = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${lines}${nodes}</svg>`;
+    wrap.querySelectorAll('.topic-node.active').forEach(el=>{
+      el.addEventListener('click', ()=> document.getElementById('lesson').scrollIntoView({behavior:'smooth'}));
+    });
+  })();
+
+  // ---------- nav ----------
+  root.querySelectorAll('[data-nav]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const target = document.getElementById(el.getAttribute('data-nav'));
+      if(target) target.scrollIntoView({behavior:'smooth'});
+    });
+  });
+  document.getElementById('startLessonBtn').addEventListener('click', ()=>{
+    document.getElementById('lesson').scrollIntoView({behavior:'smooth'});
+  });
+
+  // ---------- quiz ----------
+  const questions = [
+    {
+      q: "A ball is thrown horizontally off a cliff at 15 m/s. Ignoring air resistance, what is its horizontal velocity just before it lands?",
+      opts: ["0 m/s — it slows to a stop", "15 m/s — unchanged throughout the flight", "Increases steadily due to gravity", "Depends on the height of the cliff"],
+      correct: 1
+    },
+    {
+      q: "What causes the vertical acceleration of a projectile (no air resistance)?",
+      opts: ["The initial throwing force", "Air resistance", "Gravity, g ≈ 9.81 m/s²", "There is no vertical acceleration"],
+      correct: 2
+    },
+    {
+      q: "At the very top of a projectile's flight path, what is true?",
+      opts: ["Vertical velocity is zero", "Vertical velocity is at its maximum", "Horizontal velocity is zero", "Total speed is zero"],
+      correct: 0
+    },
+    {
+      q: "On level ground with no air resistance, which launch angle gives the maximum range?",
+      opts: ["30°", "45°", "60°", "90°"],
+      correct: 1
+    }
+  ];
+  let answers = new Array(questions.length).fill(null);
+
+  function renderQuiz(){
+    const box = document.getElementById('quizBox');
+    box.innerHTML = questions.map((qq,qi)=>`
+      <div class="q-item">
+        <div class="q-text"><span class="q-num">Q${qi+1}</span>${qq.q}</div>
+        <div class="opts" data-qi="${qi}">
+          ${qq.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">${o}</button>`).join('')}
+        </div>
+      </div>
+    `).join('') + `
+      <div class="quiz-footer">
+        <div class="score-display">Score: <span class="sv" id="liveScore">0</span> / ${questions.length}</div>
+        <button class="btn btn-primary" id="submitQuizBtn">Save score to dashboard</button>
+      </div>`;
+
+    box.querySelectorAll('.opts').forEach(group=>{
+      const qi = parseInt(group.getAttribute('data-qi'));
+      group.querySelectorAll('.opt').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if(answers[qi] !== null) return; // already answered
+          const oi = parseInt(btn.getAttribute('data-oi'));
+          answers[qi] = oi;
+          group.querySelectorAll('.opt').forEach((b,bi)=>{
+            b.disabled = true;
+            if(bi === questions[qi].correct) b.classList.add('correct');
+            else if(bi === oi) b.classList.add('wrong');
+          });
+          updateLiveScore();
+        });
+      });
+    });
+    document.getElementById('submitQuizBtn').addEventListener('click', saveQuizScore);
+    updateLiveScore();
+  }
+
+  function updateLiveScore(){
+    const score = answers.reduce((acc,a,i)=> acc + (a===questions[i].correct?1:0), 0);
+    const el = document.getElementById('liveScore');
+    if(el) el.textContent = score;
+  }
+
+  // ---------- persistence ----------
+  let profile = { name: '', bestScore: null, lessonsCompleted: 0, topicsUnlocked: 1 };
+
+  async function loadProfile(){
+    try {
+      const res = await window.storage.get('physics_profile', false);
+      if(res && res.value){
+        profile = JSON.parse(res.value);
+      }
+    } catch(e){ /* no saved profile yet */ }
+    reflectProfile();
+  }
+
+  async function saveProfile(){
+    try {
+      await window.storage.set('physics_profile', JSON.stringify(profile), false);
+    } catch(e){ console.error('Could not save progress', e); }
+  }
+
+  function reflectProfile(){
+    document.getElementById('nameInput').value = profile.name || '';
+    document.getElementById('navProfile').textContent = profile.name ? '◍ ' + profile.name : '◍ set your name';
+    document.getElementById('dashTopics').textContent = profile.topicsUnlocked + ' / 8';
+    document.getElementById('dashScore').textContent = profile.bestScore === null ? '–' : profile.bestScore + ' / ' + questions.length;
+    document.getElementById('dashLessons').textContent = profile.lessonsCompleted;
+  }
+
+  document.getElementById('saveNameBtn').addEventListener('click', ()=>{
+    const v = document.getElementById('nameInput').value.trim();
+    profile.name = v;
+    reflectProfile();
+    saveProfile();
+  });
+  document.getElementById('navProfile').addEventListener('click', ()=>{
+    document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+  });
+
+  function saveQuizScore(){
+    const score = answers.reduce((acc,a,i)=> acc + (a===questions[i].correct?1:0), 0);
+    if(profile.bestScore === null || score > profile.bestScore) profile.bestScore = score;
+    if(answers.every(a=>a!==null)) profile.lessonsCompleted = Math.max(profile.lessonsCompleted, 1);
+    reflectProfile();
+    saveProfile();
+    document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+  }
+
+  renderQuiz();
+  loadProfile();
+})();
+</script>
+</div>
+</div>
+</body>
+</html>
